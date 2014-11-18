@@ -183,9 +183,9 @@ public class LengthsUI extends JFrame{
 		Object[] options = {"Exit","Retry"};
 		int error = JOptionPane.showOptionDialog(panel,"Internet Connection Error","ERROR",
 				JOptionPane.YES_NO_OPTION,JOptionPane.ERROR_MESSAGE,
-				null,     //do not use a custom Icon
-				options,  //the titles of buttons
-				options[1]); //default button title
+				null,     
+				options,  
+				options[1]); 
 		if(error == JOptionPane.YES_OPTION){
 			System.exit(1);
 		}else{
