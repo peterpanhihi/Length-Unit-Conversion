@@ -163,8 +163,7 @@ public class LengthsUI extends JFrame{
 		try{
 			lengthUnitSoap = controller.getSoap();
 		}catch(Exception e){
-//			showInternetError();
-			e.printStackTrace();
+			showInternetError();
 		}
 	}
 	
