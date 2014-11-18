@@ -29,7 +29,10 @@ import net.webservicex.Lengths;
  *
  */
 public class LengthsUI extends JFrame{
+	/** Jlabel contains loading icon */
 	private JLabel imageLabel;
+	
+	/** Loading icon */
 	private ImageIcon loader;
 	
 	/** TextField to show output */
@@ -41,13 +44,16 @@ public class LengthsUI extends JFrame{
 	/** to measurement conversion */
 	private Lengths toUnit;
 	
+	/** TextField contains a number to convert */
 	private JTextField fromTxt;
 	
+	/** Controller connects to SOAP client */
 	private LengthController controller;
 	
 	/** SOAP client of length unit conversion */
 	private LengthUnitSoap lengthUnitSoap;
 	
+	/** Timer counts time */
 	private Timer timer;
 	
 	/**
@@ -149,6 +155,9 @@ public class LengthsUI extends JFrame{
 		connectSoap();
 	}
 	
+	/**
+	 * Connect to SOAP client.
+	 */
 	public void connectSoap(){
 		try{
 			lengthUnitSoap = controller.getSoap();
@@ -157,10 +166,16 @@ public class LengthsUI extends JFrame{
 		}
 	}
 	
+	/**
+	 * Displays loading icon.
+	 */
 	public void displayLoader(){
 		 imageLabel.setIcon(loader);
 	}
 	
+	/**
+	 * Show dialog for Internet error.
+	 */
 	public void showInternetError(){
 		JPanel panel = new JPanel();
 		
@@ -177,9 +192,18 @@ public class LengthsUI extends JFrame{
 		}
 	}
 	
+	/**
+	 * Convert value of length unit to other length unit.
+	 * Multi-threading in Java Swing with SwingWorker to execute a long-running task.
+	 * 
+	 * @author Juthamas Utamaphethai
+	 *
+	 */
 	public class LengthsWorker extends SwingWorker<Double,Void>{
 		/** number to convert */
 		private double value;
+		
+		/** number after convert */
 		private double answer;
 		
 		@Override
@@ -216,6 +240,9 @@ public class LengthsUI extends JFrame{
 			}
 		}
 		
+		/**
+		 * Start count time for 15 seconds.
+		 */
 		public void startTimer(){
 			timer = new Timer(1000*15, new ActionListener() {
 				
@@ -223,13 +250,15 @@ public class LengthsUI extends JFrame{
 				public void actionPerformed(ActionEvent e) {
 					showInternetError();
 					resetValue();
-					
 				}
 			});
 			
 			timer.start();
 		}
 		
+		/**
+		 * reset loading icon and stop timer.
+		 */
 		public void resetValue(){
 			if(timer != null){
 		    	imageLabel.setIcon(null);

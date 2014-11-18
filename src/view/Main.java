@@ -5,8 +5,7 @@ import net.webservicex.LengthUnit;
 import net.webservicex.LengthUnitSoap;
 
 /**
- * Start user interface of Length unit conversion and
- * get SOAP client from the factory inject to the UI.
+ * Start user interface of Length unit conversion. 
  * 
  * @author Juthamas Utamaphethai
  *
