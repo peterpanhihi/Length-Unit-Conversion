@@ -1,16 +1,24 @@
 package view;
 
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.concurrent.ExecutionException;
+
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import controller.LengthsWorker;
+import javax.swing.SwingWorker;
+import javax.swing.Timer;
+
+import controller.LengthController;
 import net.webservicex.LengthUnitSoap;
 import net.webservicex.Lengths;
 
@@ -21,19 +29,33 @@ import net.webservicex.Lengths;
  *
  */
 public class LengthsUI extends JFrame{
+	private JLabel imageLabel;
+	private ImageIcon loader;
+	
+	/** TextField to show output */
+	private JTextField toTxt;
+	
+	/** from measurement conversion */
+	private Lengths fromUnit;
+	
+	/** to measurement conversion */
+	private Lengths toUnit;
+	
+	private JTextField fromTxt;
+	
+	private LengthController controller;
+	
 	/** SOAP client of length unit conversion */
 	private LengthUnitSoap lengthUnitSoap;
 	
-	/** Multi-threading for Length unit conversion */
-	private LengthsWorker worker;
+	private Timer timer;
 	
 	/**
 	 * Components of user interface.
 	 * @param lengthUnitSoap SOAP client
 	 */
-	public LengthsUI( final LengthUnitSoap lengthUnitSoap) {
+	public LengthsUI() {
 		super("Length Unit Conversion");
-		this.lengthUnitSoap = lengthUnitSoap;
 		setBounds(300,200,720,550);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		getContentPane().setLayout(null);
@@ -48,7 +70,7 @@ public class LengthsUI extends JFrame{
 		label2.setFont (label2.getFont ().deriveFont (30.0f));
 		getContentPane().add(label2);
 		
-		final JTextField fromTxt = new JTextField();
+		fromTxt = new JTextField();
 		fromTxt.setBounds(30, 75, 315, 20);
 		getContentPane().add(fromTxt);
 		fromTxt.setColumns(10);
@@ -58,7 +80,7 @@ public class LengthsUI extends JFrame{
 		label3.setFont (label3.getFont ().deriveFont (20.0f));
 		getContentPane().add(label3);
 		
-		final JTextField toTxt = new JTextField();
+		toTxt = new JTextField();
 		toTxt.setBounds(385, 75, 315, 20);
 		getContentPane().add(toTxt);
 		toTxt.setColumns(10);
@@ -71,6 +93,7 @@ public class LengthsUI extends JFrame{
 		// List1
 		final JList list1 = new JList(Lengths.values());
 		list1.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+		list1.setSelectedIndex(0);
 		scroll1.setViewportView(list1);
 		getContentPane().add(scroll1);
 		
@@ -81,18 +104,26 @@ public class LengthsUI extends JFrame{
 		// List2
 		final JList list2 = new JList(Lengths.values());
 		list2.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+		list2.setSelectedIndex(0);
 		scroll2.setViewportView(list2);
 		getContentPane().add(scroll2);
 		
+		//Loading image
+		imageLabel = new JLabel();
+		loader = new ImageIcon(this.getClass().getResource("loader.gif"));
+        imageLabel.setBounds(355, 450, 16, 16);
+        getContentPane().add(imageLabel);
+		
+		//Convert button
 		JButton btn1 = new JButton("CONVERT");
 		btn1.setBounds(174, 474, 370, 35);
 		getContentPane().add(btn1);
 
 		// Event Click
 		btn1.addActionListener(new ActionListener() {
-			Lengths fromUnit, toUnit;
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				displayLoader();
 				int[] selFromList = list1.getSelectedIndices();
 				for(int index : selFromList){
 					fromUnit = (Lengths) list1.getModel().getElementAt(index);
@@ -101,17 +132,108 @@ public class LengthsUI extends JFrame{
 				for(int index : selToList){
 					toUnit = (Lengths) list2.getModel().getElementAt(index);
 				}
-				try{
-					worker = new LengthsWorker(toTxt, lengthUnitSoap, Double.parseDouble(fromTxt.getText()), fromUnit, toUnit); 
-				}
-				catch(NumberFormatException ex){
-					JOptionPane.showMessageDialog(null,"shoule be a number.");
-				}
-				worker.execute();
+				EventQueue.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						new LengthsWorker().execute();
+					}
+				});
+	
 			}
 		});
 		
 		this.setVisible(true);
 		this.setResizable(false);
+		
+		connectSoap();
+	}
+	
+	public void connectSoap(){
+		try{
+			controller = new LengthController();
+			lengthUnitSoap = controller.getSoap();
+		}catch(Exception e){
+			showInternetError();
+		}
+	}
+	
+	public void displayLoader(){
+		 imageLabel.setIcon(loader);
+	}
+	
+	public void showInternetError(){
+		JPanel panel = new JPanel();
+		
+		Object[] options = {"Exit","Retry"};
+		int error = JOptionPane.showOptionDialog(panel,"Internet Connection Error","ERROR",
+				JOptionPane.YES_NO_OPTION,JOptionPane.ERROR_MESSAGE,
+				null,     //do not use a custom Icon
+				options,  //the titles of buttons
+				options[1]); //default button title
+		if(error == JOptionPane.YES_OPTION){
+			System.exit(1);
+		}else{
+			connectSoap();
+		}
+	}
+	
+	public class LengthsWorker extends SwingWorker<Double,Void>{
+		/** number to convert */
+		private double value;
+		private double answer;
+		
+		@Override
+		protected Double doInBackground() throws Exception {
+			value = 0;
+			startTimer();
+			try{
+				value = Double.parseDouble(fromTxt.getText());
+				toTxt.setText("");
+			}
+			catch(NumberFormatException ex){
+				timer.stop();
+				JOptionPane.showMessageDialog(null,"Please fill a length to convert.");
+				resetValue();
+			}
+			try{
+			answer = lengthUnitSoap.changeLengthUnit(value, fromUnit, toUnit);
+			}catch(Exception e){
+				showInternetError();
+			}
+			return answer;
+		}
+
+		@Override
+		protected void done(){
+			try {
+				toTxt.setText(get().toString());
+				timer.stop();
+				resetValue();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		public void startTimer(){
+			timer = new Timer(1000*15, new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					showInternetError();
+					resetValue();
+				}
+			});
+			
+			timer.start();
+		}
+		
+		public void resetValue(){
+			if(timer != null){
+		    	imageLabel.setIcon(null);
+		    	timer.stop();
+		    }
+		}
 	}
 }

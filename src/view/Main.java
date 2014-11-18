@@ -1,5 +1,6 @@
 package view;
 
+import controller.LengthController;
 import net.webservicex.LengthUnit;
 import net.webservicex.LengthUnitSoap;
 
@@ -12,8 +13,6 @@ import net.webservicex.LengthUnitSoap;
  */
 public class Main {
 	public static void main(String[] args) {
-			LengthUnit factory = new LengthUnit();
-			LengthUnitSoap lengthUnitSoap = factory.getLengthUnitSoap();
-			LengthsUI ui = new LengthsUI(lengthUnitSoap);
+		LengthsUI ui = new LengthsUI();
 	}
 }
