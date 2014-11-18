@@ -4,9 +4,10 @@ import net.webservicex.LengthUnit;
 import net.webservicex.LengthUnitSoap;
 
 public class LengthController {
+	private LengthUnit factory;
 	private LengthUnitSoap lengthUnitSoap;
 	public LengthController() {
-		LengthUnit factory = new LengthUnit();
+		factory = new LengthUnit();
 		lengthUnitSoap = factory.getLengthUnitSoap();
 	}
 	

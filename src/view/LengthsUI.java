@@ -145,12 +145,12 @@ public class LengthsUI extends JFrame{
 		this.setVisible(true);
 		this.setResizable(false);
 		
+		controller = new LengthController();
 		connectSoap();
 	}
 	
 	public void connectSoap(){
 		try{
-			controller = new LengthController();
 			lengthUnitSoap = controller.getSoap();
 		}catch(Exception e){
 			showInternetError();
@@ -223,6 +223,7 @@ public class LengthsUI extends JFrame{
 				public void actionPerformed(ActionEvent e) {
 					showInternetError();
 					resetValue();
+					
 				}
 			});
 			
