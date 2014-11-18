@@ -1,4 +1,4 @@
-package controller;
+package ku.LengthConvertor.controller;
 
 import net.webservicex.LengthUnit;
 import net.webservicex.LengthUnitSoap;

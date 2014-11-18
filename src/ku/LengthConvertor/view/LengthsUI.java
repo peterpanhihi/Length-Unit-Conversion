@@ -1,4 +1,4 @@
-package view;
+package ku.LengthConvertor.view;
 
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
@@ -18,7 +18,8 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingWorker;
 import javax.swing.Timer;
 
-import controller.LengthController;
+import ku.LengthConvertor.controller.LengthController;
+
 import net.webservicex.LengthUnitSoap;
 import net.webservicex.Lengths;
 

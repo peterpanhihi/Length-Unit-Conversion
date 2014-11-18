@@ -1,8 +1,4 @@
-package view;
-
-import controller.LengthController;
-import net.webservicex.LengthUnit;
-import net.webservicex.LengthUnitSoap;
+package ku.LengthConvertor.view;
 
 /**
  * Start user interface of Length unit conversion. 
